@@ -4,3 +4,7 @@ lib
 lib64
 pyvenv.cfg
 res/
+dataset/
+models/
+.vscode
+__pycache__
