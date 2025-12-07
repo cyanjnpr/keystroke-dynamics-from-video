@@ -5,12 +5,9 @@ from typing import Tuple
 from math import sqrt
 import cbb
 import ibb
-from resnet.train import do_train
+from resnet import load_model, predict, prediction_to_char
 
 def main(font_size: int = 12, save_video: bool = False):
-    do_train()
-
-    return
     src = cv2.VideoCapture("res/video.mp4")
 
     frame_width = int(src.get(3))
@@ -35,7 +32,7 @@ def main(font_size: int = 12, save_video: bool = False):
             cv2.rectangle(frame_p, (x, y), (x + w, y + h), (0, 0, 255), 1)
         cv2.imshow('image', frame_p)
         cv2.waitKey(1)
-        out.write(frame_p)
+        # out.write(frame_p)
         frame_p = frame.copy()
         status, frame = src.read()
         i += 1
@@ -47,9 +44,12 @@ def main(font_size: int = 12, save_video: bool = False):
         cv2.rectangle(frame_p, (x, y), (x + w, y + h), (0, 0, 255), 1)
     out.write(frame_p)
     cv2.imshow('image', frame_p)
-    cv2.waitKey(0)
+    cv2.waitKey(100)
+
+    model = load_model()
 
     for pos in cursor_positions:
+        x_pos, y_pos, w_pos, h_pos = cv2.boundingRect(pos[2])
         frame_p2 = frame_p.copy()
         rcc = ibb.extract_rc(*pos)
         if (rcc is not None):
@@ -59,11 +59,20 @@ def main(font_size: int = 12, save_video: bool = False):
             rcc = cv2.resize(rcc, (w, h))
             x, y, w, h = cv2.boundingRect(rcc)
             rcc = cv2.cvtColor(rcc, cv2.COLOR_GRAY2BGR)
+            rcc = cv2.bitwise_not(rcc)
             frame_p2[0:h, 0:w] = rcc[y:y+h, x:x+w]
-            cv2.putText(frame_p2, "Time: {}s".format(round(pos[0], 3)), (10, 10 + h), cv2.FONT_HERSHEY_PLAIN, 3, (0, 0, 255), 2)
+            image_path = "res/{}.png".format(round(pos[0], 3))
+            prediction = prediction_to_char(predict(image_path, model))
+            cv2.rectangle(frame_p2, (x_pos, y_pos), (x_pos + w_pos, y_pos + h_pos), (0, 255, 0), 3)
+            cv2.putText(frame_p2, "Predicted char: {}, Time: {}s".format(prediction, round(pos[0], 2)), (10, 10 + h + 50), cv2.FONT_HERSHEY_PLAIN, 2, (0, 255, 0), 2)
             cv2.imshow('image', frame_p2)
-            cv2.imwrite("res/{}.png".format(round(pos[0], 3)), rcc)
-            for i in range(10): out.write(frame_p2)
+            cv2.imwrite(image_path, rcc)
+            print("Predicting -------------")
+            print("Time: {}s".format(round(pos[0], 3)))
+            print(f'Prediction: {prediction}')
+            print("-------------")
+
+            for i in range(20): out.write(frame_p2)
             cv2.waitKey(10)
 
     if (save_video): out.release()
