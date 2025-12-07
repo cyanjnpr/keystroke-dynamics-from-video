@@ -5,3 +5,4 @@ Algorithm is implemented based on this paper (DOI: 10.1186/s40537-022-00662-8):
 > through synthetic typing pattern extracted
 > from screen‑recorded video
 
+THIS IS CURRENTLY WIP.
