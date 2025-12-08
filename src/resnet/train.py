@@ -83,7 +83,7 @@ def train_model(dataset_dir: str, num_classes: int):
     return model, history, train_ds.class_names
 
 
-def do_train(dataset_dir: str = "src/resnet/dataset/mono"):
+def do_train(dataset_dir: str = "dataset"):
     # set up logging
     save_to = os.path.join("src/resnet/models", time.strftime("%Y%m%d%H%M"))
     try:

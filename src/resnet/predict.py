@@ -5,7 +5,7 @@ import numpy as np
 
 def prediction_to_char(prediction: int):
     chars = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
-    return chars[prediction - 1]
+    return chars[prediction]
 
 def load_model(path = "src/resnet/models/202512071647/model.keras"):
     model = load(path)
@@ -17,7 +17,7 @@ def predict(path, model):
                    keep_aspect_ratio = True)
     x = image.img_to_array(img)
     x = np.expand_dims(x, axis=0)
-    x = preprocess_input(x)
+    # x = preprocess_input(x)
 
     pred = model.predict(x)[0]
-    return np.argmax(pred) + 1
+    return np.argmax(pred)
