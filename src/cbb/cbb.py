@@ -24,13 +24,13 @@ def cursor_detection(frame: MatLike, frame_p: MatLike, previous_contour: None) -
     for contour in frame_contours:
         _, _, w, h = cv.boundingRect(contour)
         _, _, w_b, h_b = cv.boundingRect(contour if best_contour is None else best_contour)
-        # if ((float(h) / float(w) >= 5)): #and w <= 10):
-            # if (float(h) / float(w) >= float(h_b) / float(w_b)):
-        if (h > w and w > 3 and h > 20):
-            if (previous_contour is None or 
-                (float(h) / float(w) >= float(h_b) / float(w_b)) or 
-                contour_distance(contour, previous_contour) < contour_distance(best_contour, previous_contour)
-                ):
+        if ((float(h) / float(w) >= 5)): #and w <= 10):
+            if (float(h) / float(w) >= float(h_b) / float(w_b)):
+        # if (h > w and w > 3 and h > 20):
+        #     if (previous_contour is None or 
+        #         (float(h) / float(w) >= float(h_b) / float(w_b)) or 
+        #         contour_distance(contour, previous_contour) < contour_distance(best_contour, previous_contour)
+        #         ):
                 best_contour = contour
     return best_contour
 

@@ -47,7 +47,7 @@ def main(font_size: int = 12, save_video: bool = False):
     cv2.waitKey(100)
 
     # model = load_model("models/202512071647/model.keras")
-    model = load_model("models/202512081642/model.keras")
+    model = load_model("models/202512082209/model.keras")
 
     for pos in cursor_positions:
         x_pos, y_pos, w_pos, h_pos = cv2.boundingRect(pos[2])

@@ -46,30 +46,25 @@ def train_model(dataset_dir: str, num_classes: int):
     norm_val_ds = val_ds.map(lambda x, y: (normalization_layer(x), y))
 
     base_model = ResNet50(
+        weights = "imagenet",
         include_top = False,
+        input_shape = (32, 32, 3)
         )
     
     base_model.layers.pop()
     for layer in base_model.layers:
         layer.trainable = False
-    x = base_model.output #.layers[-1].output
+
+    inputs = keras.Input(shape = (32, 32, 3))
+    x = base_model(inputs, training = False)
     # flatten the tensor or whatever
     # (1, 1, num_classes) -> (num_classes)
     x = GlobalAveragePooling2D()(x)
-    
-    x = Dense(512, kernel_regularizer=l2(1e-3))(x)
-    x = BatchNormalization()(x)
-    x = Activation('relu')(x)
-    x = Dropout(0.5)(x)
-    x = Dense(256, kernel_regularizer=l2(1e-3))(x) 
-    x = BatchNormalization()(x)
-    x = Activation('relu')(x)
-    x = Dropout(0.5)(x)
 
     x = Dense(num_classes, activation="softmax")(x)
 
     model = Model(
-        inputs = base_model.input, 
+        inputs = inputs, 
         outputs = x
     )
 

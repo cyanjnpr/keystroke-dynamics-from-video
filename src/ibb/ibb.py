@@ -40,12 +40,11 @@ def prepare_rc(rc: MatLike) -> MatLike:
     side = max(w, h)
 
     rc = cv.copyMakeBorder(rc[y:y+h, x:x+w], 
-                      side - h + ceil(side / 8.), side - h + ceil(side / 8.),
-                      side - w + ceil(side / 8.), side - w + ceil(side / 8.),
+                      (side - h) // 2 + ceil(side / 5.), (side - h) // 2 + ceil(side / 5.),
+                      (side - w) // 2 + ceil(side / 5.), (side - w) // 2 + ceil(side / 5.),
                       cv.BORDER_CONSTANT,
                       value = (0, 0, 0))
     
     # reverse mask
-    # rc = cv.bitwise_not(rc)
     _, rc = cv.threshold(rc, 127, 255, cv.THRESH_BINARY_INV)
     return rc

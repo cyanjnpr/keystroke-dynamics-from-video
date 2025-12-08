@@ -14,7 +14,8 @@ def load_model(path: str):
 def predict(path, model):
     img = image.load_img(path, 
                    target_size=(32, 32),
-                   keep_aspect_ratio = False)
+                   keep_aspect_ratio = True,
+                   interpolation="bilinear")
     x = image.img_to_array(img)
     x = np.expand_dims(x, axis=0)
     # x = preprocess_input(x)
