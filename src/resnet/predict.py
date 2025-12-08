@@ -7,14 +7,14 @@ def prediction_to_char(prediction: int):
     chars = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
     return chars[prediction]
 
-def load_model(path = "src/resnet/models/202512071647/model.keras"):
+def load_model(path: str):
     model = load(path)
     return model
 
 def predict(path, model):
     img = image.load_img(path, 
                    target_size=(32, 32),
-                   keep_aspect_ratio = True)
+                   keep_aspect_ratio = False)
     x = image.img_to_array(img)
     x = np.expand_dims(x, axis=0)
     # x = preprocess_input(x)

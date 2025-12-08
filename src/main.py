@@ -46,27 +46,28 @@ def main(font_size: int = 12, save_video: bool = False):
     cv2.imshow('image', frame_p)
     cv2.waitKey(100)
 
-    model = load_model()
+    # model = load_model("models/202512071647/model.keras")
+    model = load_model("models/202512081642/model.keras")
 
     for pos in cursor_positions:
         x_pos, y_pos, w_pos, h_pos = cv2.boundingRect(pos[2])
         frame_p2 = frame_p.copy()
         rcc = ibb.extract_rc(*pos)
         if (rcc is not None):
+            rcc_copy = cv2.cvtColor(rcc, cv2.COLOR_GRAY2BGR)
             x, y, w, h = cv2.boundingRect(rcc)
-            w *= 30
-            h *= 30
+            w *= 5
+            h *= 5
             rcc = cv2.resize(rcc, (w, h))
             x, y, w, h = cv2.boundingRect(rcc)
             rcc = cv2.cvtColor(rcc, cv2.COLOR_GRAY2BGR)
-            rcc = cv2.bitwise_not(rcc)
             frame_p2[0:h, 0:w] = rcc[y:y+h, x:x+w]
             image_path = "res/{}.png".format(round(pos[0], 3))
+            cv2.imwrite(image_path, rcc_copy)
             prediction = prediction_to_char(predict(image_path, model))
             cv2.rectangle(frame_p2, (x_pos, y_pos), (x_pos + w_pos, y_pos + h_pos), (0, 255, 0), 3)
             cv2.putText(frame_p2, "Predicted char: {}, Time: {}s".format(prediction, round(pos[0], 2)), (10, 10 + h + 50), cv2.FONT_HERSHEY_PLAIN, 2, (0, 255, 0), 2)
             cv2.imshow('image', frame_p2)
-            cv2.imwrite(image_path, rcc)
             print("Predicting -------------")
             print("Time: {}s".format(round(pos[0], 3)))
             print(f'Prediction: {prediction}')

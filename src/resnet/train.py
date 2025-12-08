@@ -6,9 +6,10 @@ from pathlib import Path
 from typing import Tuple
 
 from keras.applications.resnet50 import ResNet50
-from keras.layers import Dense, GlobalAveragePooling2D
+from keras.layers import Dense, GlobalAveragePooling2D, Activation, Dropout, BatchNormalization
 from keras.models import Model
 from keras.optimizers import SGD
+from keras.regularizers import l2
 import keras
 
 # Paremeters used here are obtained from
@@ -51,11 +52,20 @@ def train_model(dataset_dir: str, num_classes: int):
     base_model.layers.pop()
     for layer in base_model.layers:
         layer.trainable = False
-    x = base_model.layers[-1].output
+    x = base_model.output #.layers[-1].output
     # flatten the tensor or whatever
-    # i have no clue
     # (1, 1, num_classes) -> (num_classes)
     x = GlobalAveragePooling2D()(x)
+    
+    x = Dense(512, kernel_regularizer=l2(1e-3))(x)
+    x = BatchNormalization()(x)
+    x = Activation('relu')(x)
+    x = Dropout(0.5)(x)
+    x = Dense(256, kernel_regularizer=l2(1e-3))(x) 
+    x = BatchNormalization()(x)
+    x = Activation('relu')(x)
+    x = Dropout(0.5)(x)
+
     x = Dense(num_classes, activation="softmax")(x)
 
     model = Model(
@@ -83,9 +93,9 @@ def train_model(dataset_dir: str, num_classes: int):
     return model, history, train_ds.class_names
 
 
-def do_train(dataset_dir: str = "dataset"):
+def do_train(dataset_dir: str = "dataset", models_dir: str = "models"):
     # set up logging
-    save_to = os.path.join("src/resnet/models", time.strftime("%Y%m%d%H%M"))
+    save_to = os.path.join(models_dir, time.strftime("%Y%m%d%H%M"))
     try:
         os.mkdir(save_to)
     except OSError:
