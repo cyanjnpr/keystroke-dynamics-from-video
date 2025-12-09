@@ -9,9 +9,12 @@ import os
 from resnet import load_model, predict, prediction_to_char
 
 def main(font_size: int = 12, save_video: bool = False):
-    if len(os.listdir("models")) == 0:
-        print("no models")
+    model_list = [model for model in os.listdir("models") if model.endswith(".keras")]
+    model_list.sort()
+    if len(model_list) == 0:
+        print("No models detected. Train a model first.")
         return
+    model = load_model(os.path.join("models", model_list[-1]))
 
     src = cv2.VideoCapture("res/video.mp4")
 
@@ -51,7 +54,7 @@ def main(font_size: int = 12, save_video: bool = False):
     cv2.imshow('image', frame_p)
     cv2.waitKey(100)
 
-    model = load_model("models/202512090004/model.keras") # 0.9566 acc, all layers trainable
+    # model = load_model("models/202512090004/model.keras") # 0.9566 acc, all layers trainable
 
     for pos in cursor_positions:
         x_pos, y_pos, w_pos, h_pos = cv2.boundingRect(pos[2])
