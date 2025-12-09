@@ -16,7 +16,7 @@ def predict(path, model):
                    target_size=(32, 32),
                    keep_aspect_ratio = True,
                    interpolation="bilinear")
-    x = image.img_to_array(img)
+    x = image.img_to_array(img).astype("float32") / 255.0
     x = np.expand_dims(x, axis=0)
     # x = preprocess_input(x)
 

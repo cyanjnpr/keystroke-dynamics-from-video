@@ -50,17 +50,15 @@ def train_model(dataset_dir: str, num_classes: int):
         include_top = False,
         input_shape = (32, 32, 3)
         )
-    
-    base_model.layers.pop()
-    for layer in base_model.layers:
-        layer.trainable = False
 
     inputs = keras.Input(shape = (32, 32, 3))
-    x = base_model(inputs, training = False)
+    x = base_model(inputs, training = True)
     # flatten the tensor or whatever
     # (1, 1, num_classes) -> (num_classes)
     x = GlobalAveragePooling2D()(x)
 
+    # since all layers are trainable, try to reduce overfiting
+    x = Dropout(0.2)(x)
     x = Dense(num_classes, activation="softmax")(x)
 
     model = Model(
@@ -88,7 +86,7 @@ def train_model(dataset_dir: str, num_classes: int):
     return model, history, train_ds.class_names
 
 
-def do_train(dataset_dir: str = "dataset", models_dir: str = "models"):
+def do_train(dataset_dir: str, models_dir: str):
     # set up logging
     save_to = os.path.join(models_dir, time.strftime("%Y%m%d%H%M"))
     try:
