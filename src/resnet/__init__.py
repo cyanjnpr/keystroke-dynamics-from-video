@@ -1,2 +1,2 @@
-from .predict import load_model, predict, prediction_to_char
+from .predict import load_model, predict
 from .train import train

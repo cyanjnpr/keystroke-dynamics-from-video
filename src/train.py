@@ -12,6 +12,7 @@ import tempfile
 # Applications (VISAPP), Lisbon, Portugal, February 2009. 
 #
 DATASET_URL = "https://info-ee.surrey.ac.uk/CVSSP/demos/chars74k/EnglishFnt.tgz"
+# FALLBACK_DATASET_URL = "https://web.archive.org/web/20240711155040if_/https://info-ee.surrey.ac.uk/CVSSP/demos/chars74k/EnglishFnt.tgz"
 
 def download_dataset(dataset_dir: str) -> bool:
     success = False

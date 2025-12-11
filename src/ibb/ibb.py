@@ -2,6 +2,9 @@ import cv2 as cv
 from cv2.typing import MatLike
 from typing import Tuple
 from math import ceil
+import config
+
+status, conf = config.ConfigManager.read_main_config("default.conf")
 
 # isolation bounding box
 def cbb_to_ibb(x, y, w, h) -> Tuple[int, int, int, int]:
@@ -33,6 +36,7 @@ def extract_rc(time: float, frame: MatLike, contour: MatLike) -> MatLike:
     # [-1] is cursor (not always, figure 5 and 6 in the paper)
     return prepare_rc(masks[-2])
 
+# center character on a square with even margins
 def prepare_rc(rc: MatLike) -> MatLike:
     contours, _ = cv.findContours(rc, cv.RETR_TREE, cv.CHAIN_APPROX_SIMPLE)
     if len(contours) == 0: return rc
@@ -40,8 +44,8 @@ def prepare_rc(rc: MatLike) -> MatLike:
     side = max(w, h)
 
     rc = cv.copyMakeBorder(rc[y:y+h, x:x+w], 
-                      (side - h) // 2 + ceil(side / 5.), (side - h) // 2 + ceil(side / 5.),
-                      (side - w) // 2 + ceil(side / 5.), (side - w) // 2 + ceil(side / 5.),
+                      (side - h) // 2 + ceil(side / 8.), (side - h) // 2 + ceil(side / 8.),
+                      (side - w) // 2 + ceil(side / 8.), (side - w) // 2 + ceil(side / 8.),
                       cv.BORDER_CONSTANT,
                       value = (0, 0, 0))
     

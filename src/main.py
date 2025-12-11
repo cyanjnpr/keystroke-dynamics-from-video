@@ -6,7 +6,7 @@ from math import sqrt
 import cbb
 import ibb
 import os
-from resnet import load_model, predict, prediction_to_char
+from resnet import load_model, predict
 
 def main(font_size: int = 12, save_video: bool = False):
     model_list = [model for model in os.listdir("models") if model.endswith(".keras")]
@@ -54,8 +54,7 @@ def main(font_size: int = 12, save_video: bool = False):
     cv2.imshow('image', frame_p)
     cv2.waitKey(100)
 
-    # model = load_model("models/202512090004/model.keras") # 0.9566 acc, all layers trainable
-
+    text = ""
     for pos in cursor_positions:
         x_pos, y_pos, w_pos, h_pos = cv2.boundingRect(pos[2])
         frame_p2 = frame_p.copy()
@@ -63,25 +62,28 @@ def main(font_size: int = 12, save_video: bool = False):
         if (rcc is not None):
             rcc_copy = cv2.cvtColor(rcc, cv2.COLOR_GRAY2BGR)
             x, y, w, h = cv2.boundingRect(rcc)
-            w *= 5
-            h *= 5
+            w, h = 128, 128
             rcc = cv2.resize(rcc, (w, h))
             x, y, w, h = cv2.boundingRect(rcc)
             rcc = cv2.cvtColor(rcc, cv2.COLOR_GRAY2BGR)
+            cv2.rectangle(frame_p2, (0, 0), (512 + 256, 256), (0, 0, 0), -1)
             frame_p2[0:h, 0:w] = rcc[y:y+h, x:x+w]
             image_path = "res/{}.png".format(round(pos[0], 3))
             cv2.imwrite(image_path, rcc_copy)
-            prediction = prediction_to_char(predict(image_path, model))
+            prediction = predict(image_path, model)
             cv2.rectangle(frame_p2, (x_pos, y_pos), (x_pos + w_pos, y_pos + h_pos), (0, 255, 0), 3)
-            cv2.putText(frame_p2, "Predicted char: {}, Time: {}s".format(prediction, round(pos[0], 2)), (10, 10 + h + 50), cv2.FONT_HERSHEY_PLAIN, 2, (0, 255, 0), 2)
+            cv2.putText(frame_p2, "Predicted char: {}, Acc: {}%, Time: {}s".format(prediction.character, round(100 * prediction.accuracy), round(pos[0], 2)), (10, 10 + h + 50), cv2.FONT_HERSHEY_PLAIN, 2, (0, 255, 0), 2)
             cv2.imshow('image', frame_p2)
             print("Predicting -------------")
             print("Time: {}s".format(round(pos[0], 3)))
-            print(f'Prediction: {prediction}')
+            print(f'Prediction: {prediction.character}')
             print("-------------")
 
+            if (prediction.accuracy >= 0.7): text = text + prediction.character
             for i in range(20): out.write(frame_p2)
             cv2.waitKey(10)
+        else: text = text + " "
+    print("Here's the recovered text: ", text)
 
     if (save_video): out.release()
     src.release()

@@ -11,7 +11,8 @@ dependencies = [
     "opencv-python (>=4.12.0.88,<5.0.0.0)",
     "keras (>=3.12.0,<4.0.0)",
     "tensorflow[and-cuda] (>=2.20.0,<3.0.0)",
-    "numpy (>=2,<2.3.0)"
+    "numpy (>=2,<2.3.0)",
+    "pyyaml (>=6.0.3,<7.0.0)"
 ]
 
 [tool.poetry]

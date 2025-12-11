@@ -2,11 +2,17 @@ from typing import List, Tuple
 from cv2.typing import MatLike
 import cv2 as cv
 from math import sqrt
+import config
 
 # TODO: it depends on font and ppi
 MAX_CONTOUR_DISTANCE = 100
 # TODO: it also depends on ppi
 MAX_LINE_HEIGHT_DIFF = 4
+
+status, conf = config.ConfigManager.read_main_config("default.conf")
+
+def get_font_height():
+    return conf.get_font_height()
 
 def contour_distance(contour, contour_p) -> float:
     x, y, _, _ = cv.boundingRect(contour)
@@ -24,13 +30,8 @@ def cursor_detection(frame: MatLike, frame_p: MatLike, previous_contour: None) -
     for contour in frame_contours:
         _, _, w, h = cv.boundingRect(contour)
         _, _, w_b, h_b = cv.boundingRect(contour if best_contour is None else best_contour)
-        if ((float(h) / float(w) >= 5)): #and w <= 10):
+        if (h > (get_font_height() - MAX_LINE_HEIGHT_DIFF) and h < (get_font_height() + MAX_LINE_HEIGHT_DIFF) and w < h):
             if (float(h) / float(w) >= float(h_b) / float(w_b)):
-        # if (h > w and w > 3 and h > 20):
-        #     if (previous_contour is None or 
-        #         (float(h) / float(w) >= float(h_b) / float(w_b)) or 
-        #         contour_distance(contour, previous_contour) < contour_distance(best_contour, previous_contour)
-        #         ):
                 best_contour = contour
     return best_contour
 
