@@ -20,10 +20,15 @@ class MainConfig():
 
 
 class ConfigManager():
+    path: str = ""
 
     @staticmethod
-    def read_main_config(path: str) -> Tuple[bool, MainConfig]:
-        with open(path, "r") as handle:
+    def set_config_path(path: str):
+        ConfigManager.path = path
+
+    @staticmethod
+    def read_main_config() -> Tuple[bool, MainConfig]:
+        with open(ConfigManager.path, "r") as handle:
             raw_conf = yaml.safe_load(handle)
             try:
                 main_conf = MainConfig(raw_conf["ppi"], 

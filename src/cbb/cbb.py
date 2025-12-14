@@ -9,7 +9,7 @@ MAX_CONTOUR_DISTANCE = 100
 # TODO: it also depends on ppi
 MAX_LINE_HEIGHT_DIFF = 4
 
-status, conf = config.ConfigManager.read_main_config("default.conf")
+status, conf = config.ConfigManager.read_main_config()
 
 def get_font_height():
     return conf.get_font_height()
@@ -25,13 +25,12 @@ def cursor_detection(frame: MatLike, frame_p: MatLike, previous_contour: None) -
     frame_xored = cv.bitwise_xor(frame, frame_p)
     frame_contours, _ = cv.findContours(frame_xored, cv.RETR_TREE, cv.CHAIN_APPROX_SIMPLE)
 
-    # look for the tallest slim line.
     best_contour = None
     for contour in frame_contours:
         _, _, w, h = cv.boundingRect(contour)
         _, _, w_b, h_b = cv.boundingRect(contour if best_contour is None else best_contour)
-        if (h > (get_font_height() - MAX_LINE_HEIGHT_DIFF) and h < (get_font_height() + MAX_LINE_HEIGHT_DIFF) and w < h):
-            if (float(h) / float(w) >= float(h_b) / float(w_b)):
+        if (h > (get_font_height() - MAX_LINE_HEIGHT_DIFF) and h < (get_font_height() + MAX_LINE_HEIGHT_DIFF) ):#and w < h):
+            if (previous_contour is None or contour_distance(best_contour, previous_contour) > contour_distance(contour, previous_contour)):
                 best_contour = contour
     return best_contour
 

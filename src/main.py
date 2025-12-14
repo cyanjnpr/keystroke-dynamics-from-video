@@ -1,3 +1,6 @@
+import config
+config.ConfigManager.set_config_path("default.conf")
+
 import cv2
 import numpy as np
 from cv2.typing import MatLike
@@ -8,13 +11,16 @@ import ibb
 import os
 from resnet import load_model, predict
 
-def main(font_size: int = 12, save_video: bool = False):
+def get_model():
     model_list = [model for model in os.listdir("models") if model.endswith(".keras")]
     model_list.sort()
     if len(model_list) == 0:
         print("No models detected. Train a model first.")
         return
-    model = load_model(os.path.join("models", model_list[-1]))
+    return load_model(os.path.join("models", model_list[-1]))
+
+def main(save_video: bool = False):
+    model = get_model()
 
     src = cv2.VideoCapture("res/video.mp4")
 
@@ -34,13 +40,10 @@ def main(font_size: int = 12, save_video: bool = False):
         contour = cbb.cursor_detection(frame, frame_p, cursor_positions[-1][2] if len(cursor_positions) > 0 else None)
         if (contour is not None):
             if (len(cursor_positions) == 0 or cbb.contour_distance(contour, cursor_positions[-1][2]) > 1):
-                cursor_positions.append((i / float(fps), frame.copy(), contour))
+                cursor_positions.append((i, frame.copy(), contour))
         for _, _, contour in cursor_positions:
             x, y, w, h = cv2.boundingRect(contour)
             cv2.rectangle(frame_p, (x, y), (x + w, y + h), (0, 0, 255), 1)
-        cv2.imshow('image', frame_p)
-        cv2.waitKey(1)
-        # out.write(frame_p)
         frame_p = frame.copy()
         status, frame = src.read()
         i += 1
@@ -55,11 +58,13 @@ def main(font_size: int = 12, save_video: bool = False):
     cv2.waitKey(100)
 
     text = ""
+    previous_kunit = None
     for pos in cursor_positions:
         x_pos, y_pos, w_pos, h_pos = cv2.boundingRect(pos[2])
         frame_p2 = frame_p.copy()
-        rcc = ibb.extract_rc(*pos)
-        if (rcc is not None):
+        kunit = ibb.extract_rc(*pos)
+        rcc = kunit.image
+        if (rcc is not None and (previous_kunit is None or not previous_kunit.is_the_same(kunit))):
             rcc_copy = cv2.cvtColor(rcc, cv2.COLOR_GRAY2BGR)
             x, y, w, h = cv2.boundingRect(rcc)
             w, h = 128, 128
@@ -80,13 +85,14 @@ def main(font_size: int = 12, save_video: bool = False):
             print("-------------")
 
             if (prediction.accuracy >= 0.7): text = text + prediction.character
-            for i in range(20): out.write(frame_p2)
+            cv2.putText(frame_p2, "{}".format(text), (10, frame_height - 100), cv2.FONT_HERSHEY_PLAIN, 2, (0, 0, 0), 2)
+            for i in range(15): out.write(frame_p2)
             cv2.waitKey(10)
-        else: text = text + " "
+            previous_kunit = kunit
     print("Here's the recovered text: ", text)
 
     if (save_video): out.release()
     src.release()
         
 if __name__ == "__main__":
-    main(16, True)
+    main(True)

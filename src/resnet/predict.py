@@ -1,6 +1,5 @@
 from keras.models import load_model as load
 from keras.preprocessing import image
-from keras.applications.resnet50 import preprocess_input, decode_predictions
 import numpy as np
 from dataclasses import dataclass
 
@@ -26,7 +25,7 @@ def predict(path, model) -> Prediction:
     x = image.img_to_array(img).astype("float32") / 255.0
     x = np.expand_dims(x, axis=0)
 
-    pred = model.predict(x)[0]
+    pred = model.predict(x, verbose = None)[0]
 
     argmax = np.argmax(pred)
     return Prediction(
