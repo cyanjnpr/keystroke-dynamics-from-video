@@ -50,9 +50,12 @@ def main(save_video: bool = False):
 
     cursor_positions = cbb.clear_anomalies(cursor_positions)
     for _, _, contour in cursor_positions:
+        # frame_pp = frame_p.copy()
         x, y, w, h = cv2.boundingRect(contour)
         cv2.rectangle(frame_p, (x - h, y), (x + w, y + h), (255, 0, 0), 1)
         cv2.rectangle(frame_p, (x, y), (x + w, y + h), (0, 0, 255), 1)
+        # cv2.imshow('image', frame_pp)
+        # cv2.waitKey(0)
     out.write(frame_p)
     cv2.imshow('image', frame_p)
     cv2.waitKey(100)
@@ -87,7 +90,8 @@ def main(save_video: bool = False):
             if (prediction.accuracy >= 0.7): text = text + prediction.character
             cv2.putText(frame_p2, "{}".format(text), (10, frame_height - 100), cv2.FONT_HERSHEY_PLAIN, 2, (0, 0, 0), 2)
             for i in range(15): out.write(frame_p2)
-            cv2.waitKey(10)
+            # cv2.waitKey(10)
+            # cv2.waitKey(0)
             previous_kunit = kunit
     print("Here's the recovered text: ", text)
 

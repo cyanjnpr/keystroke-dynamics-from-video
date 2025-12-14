@@ -47,6 +47,28 @@ def extract_rc(frame_no: int, frame: MatLike, contour: MatLike) -> KUnit:
     rc_y += y
     return KUnit(frame_no, rc, rc_x, rc_y, rc_w, rc_h)
 
+def separate_cursor(rc: MatLike):
+    rc_copy = rc.copy()
+    rc_copy = cv.cvtColor(rc_copy, cv.COLOR_GRAY2BGR)
+
+    contours, _ = cv.findContours(rc, cv.RETR_TREE, cv.CHAIN_APPROX_SIMPLE)
+    if len(contours) == 0: return
+    cnt = contours[0]
+
+    hull = cv.convexHull(cnt, returnPoints = False)
+    defects = cv.convexityDefects(cnt, hull)
+
+    if defects is not None:
+        for i in range(defects.shape[0]):
+            s,e,f,d = defects[i,0]
+            start = tuple(cnt[s][0])
+            end = tuple(cnt[e][0])
+            far = tuple(cnt[f][0])
+            cv.line(rc_copy,start,end,[0,255,0],1)
+            cv.circle(rc_copy,far,1,[0,0,255],-1)
+    # cv.imshow("image", rc_copy)
+    # cv.waitKey(0)
+
 def rc_coords(rc: MatLike) -> Tuple[int, int, int, int]:
     contours, _ = cv.findContours(rc, cv.RETR_TREE, cv.CHAIN_APPROX_SIMPLE)
     if len(contours) == 0: return 0,0,0,0
