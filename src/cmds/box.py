@@ -1,26 +1,24 @@
 import cv2 as cv
 
 from ..isolation import CursorDetector
+from ..config import ConfigManager
+from ..util import cbb_to_ibb, save_location
 from rich.progress import Progress
 from pathlib import Path
 import time
 from enum import Enum
 
-MARGIN_Y = 20
-MARGIN_X = 100
+status, conf = ConfigManager.read_main_config()
+
+MARGIN_Y = int(conf.get_font_height() / 2)
+MARGIN_X = int(conf.get_font_height() * 3)
 
 class BoundingBox(Enum):
     CURSOR = 1
     ISOLATION = 2
 
-    def save_location(self, dest: str) -> Path:
-        timestamp = time.strftime("%Y%m%d%H%M%S")
-        path = Path(dest) / f"{"cbb" if self is BoundingBox.CURSOR else "ibb"}-{timestamp}"
-        path.mkdir(parents=True, exist_ok=False)
-        return path
-
 def bb_command(kind: BoundingBox, filename: str, dest: str):
-    dest_path = kind.save_location(dest)
+    dest_path = save_location(dest, "cbb" if kind is BoundingBox.CURSOR else "ibb")
     src = cv.VideoCapture(filename)
     frame_width = int(src.get(cv.CAP_PROP_FRAME_WIDTH))
     frame_height = int(src.get(cv.CAP_PROP_FRAME_HEIGHT))
@@ -42,11 +40,11 @@ def bb_command(kind: BoundingBox, filename: str, dest: str):
                 x, y, w, h = cv.boundingRect(c)
                 fx = max(x - MARGIN_X, 0)
                 fy = max(y - MARGIN_Y, 0)
-                fw = min(w + 2*MARGIN_X, frame_width)
-                fh = min(h + 2*MARGIN_Y, frame_height)
+                fw = min(conf.get_font_height() + 2*MARGIN_X, frame_width-x)
+                fh = min(conf.get_font_height() + 2*MARGIN_Y, frame_height-y)
                 if kind is BoundingBox.ISOLATION:
-                    diff = max(2*h - w, 0)
-                    cv.rectangle(f, (x-diff, y), (x+w, y+h), (255, 0, 0), 2)
+                    ix, iy, iw, ih = cbb_to_ibb(x, y, w, h)
+                    cv.rectangle(f, (ix, iy), (ix+iw, iy+ih), (255, 0, 0), 2)
                 cv.rectangle(f, (x, y), (x+w, y+h), (0, 0, 255), 2)
                 f = f[fy:fy+fh, fx:fx+fw]
                 cv.imwrite(str(dest_path / f"{i}.png"), f)

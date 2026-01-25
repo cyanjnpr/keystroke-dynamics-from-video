@@ -2,7 +2,8 @@ from .config import ConfigManager
 ConfigManager.set_config_path("default.conf")
 
 import click
-from .cmds import train_command, analyze_command, cbb_command, ibb_command
+from .cmds import (train_command, analyze_command, 
+    cbb_command, ibb_command, kunit_command)
 
 @click.group()
 @click.version_option("0.0.1")
@@ -20,7 +21,7 @@ def train(ctx, fallback: bool):
     train_command(fallback)
 
 @click.command("analyze")
-@click.argument("filename", required=True)
+@click.argument("filename")
 @click.pass_context
 def analyze(ctx, filename: str):
     """
@@ -29,7 +30,7 @@ def analyze(ctx, filename: str):
     analyze_command(filename)
 
 @click.command("cbb")
-@click.argument("filename", required=True)
+@click.argument("filename")
 @click.argument("dest")
 @click.pass_context
 def cbb(ctx, filename: str, dest: str):
@@ -39,7 +40,7 @@ def cbb(ctx, filename: str, dest: str):
     cbb_command(filename, dest)
 
 @click.command("ibb")
-@click.argument("filename", required=True)
+@click.argument("filename")
 @click.argument("dest")
 @click.pass_context
 def ibb(ctx, filename: str, dest: str):
@@ -49,10 +50,22 @@ def ibb(ctx, filename: str, dest: str):
     ibb_command(filename, dest)
 
 
+@click.command("kunit")
+@click.argument("filename")
+@click.argument("dest")
+@click.pass_context
+def kunit(ctx, filename: str, dest: str):
+    """
+    detect rightmost character in each isolation bounding box and save to a directory dest
+    """
+    kunit_command(filename, dest)
+
+
 cli.add_command(train)
 cli.add_command(analyze)
 cli.add_command(cbb)
 cli.add_command(ibb)
+cli.add_command(kunit)
 
 # def main(save_video: bool = False):
 #     model = get_model()

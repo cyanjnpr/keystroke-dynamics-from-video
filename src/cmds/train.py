@@ -39,7 +39,7 @@ def dataset_check(dataset_dir: str, fallback: bool) -> bool:
     contents = os.listdir(dataset_dir)
     contents = [p for p in contents if not p.startswith(".")]
     if len(contents) == 0:
-        print("Dataset not found")
+        click.echo("Dataset not found")
         return download_dataset(dataset_dir, fallback)
     return True
 

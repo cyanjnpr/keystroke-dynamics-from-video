@@ -13,7 +13,6 @@ def get_model():
     return load_model(os.path.join("models", model_list[-1]))
 
 def analyze_command(filename):
-    print(filename)
     src = cv.VideoCapture(filename)
     s, frame = src.read()
     if not s: return
