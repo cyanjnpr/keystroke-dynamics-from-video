@@ -1,8 +1,9 @@
-from resnet import train
+from ..resnet import train
 import os
 import tarfile
 import urllib3
 import tempfile
+import click
 
 # this dataset comes from the following paper:
 #
@@ -12,42 +13,43 @@ import tempfile
 # Applications (VISAPP), Lisbon, Portugal, February 2009. 
 #
 DATASET_URL = "https://info-ee.surrey.ac.uk/CVSSP/demos/chars74k/EnglishFnt.tgz"
-# FALLBACK_DATASET_URL = "https://web.archive.org/web/20240711155040if_/https://info-ee.surrey.ac.uk/CVSSP/demos/chars74k/EnglishFnt.tgz"
+FALLBACK_DATASET_URL = "https://web.archive.org/web/20240711155040if_/https://info-ee.surrey.ac.uk/CVSSP/demos/chars74k/EnglishFnt.tgz"
 
-def download_dataset(dataset_dir: str) -> bool:
+def download_dataset(dataset_dir: str, fallback: bool) -> bool:
+    ur = FALLBACK_DATASET_URL if fallback else DATASET_URL
     success = False
     fd, filename = tempfile.mkstemp()
-    print("Downloading the dataset...")
+    click.echo("Downloading the dataset...")
     with urllib3.PoolManager() as http:
-        with http.request("GET", DATASET_URL, preload_content=False, decode_content=False) as r:
+        with http.request("GET", ur, preload_content=False, decode_content=False) as r:
             if (r.status == 200):
                 with open(fd, 'wb') as handle:
                     for chunk in r.stream():
                         handle.write(chunk)
                     success = True
     if success:
-        print("Downloaded the dataset")
-        print("Extracting...")
+        click.echo("Downloaded the dataset")
+        click.echo("Extracting...")
         archive = tarfile.open(filename)
         archive.extractall(dataset_dir, filter='data')
         archive.close()
     return success
 
-def dataset_check(dataset_dir: str) -> bool:
+def dataset_check(dataset_dir: str, fallback: bool) -> bool:
     contents = os.listdir(dataset_dir)
     contents = [p for p in contents if not p.startswith(".")]
     if len(contents) == 0:
         print("Dataset not found")
-        return download_dataset(dataset_dir)
+        return download_dataset(dataset_dir, fallback)
     return True
 
-if __name__ == "__main__":
+def train_command(fallback: bool):
     models_path = "models"
     dataset_path = "dataset"
-    if dataset_check(dataset_path):
-        print("Training...")
+    if dataset_check(dataset_path, fallback):
+        click.echo("Training...")
         dataset_path = os.path.join(dataset_path, "English", "Fnt")
         train(dataset_path, models_path)
     else:
-        print("Failed to download or extract the dataset")
+        click.echo("Failed to download or extract the dataset")
 
