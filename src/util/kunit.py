@@ -17,9 +17,11 @@ class KUnit:
         h = int((self.h + that.h) / 2.)
         return (abs(self.x - that.x) <= w and abs(self.y - that.y) <= h)
     
+    def get_image(self) -> MatLike:
+        return cv.bitwise_not(self.image)
+    
     def image_repr(self) -> MatLike:
-        result = cv.bitwise_not(self.image)
-        result = cv.copyMakeBorder(result, 
+        result = cv.copyMakeBorder(self.image, 
             64, 64, 64, 64,
             cv.BORDER_CONSTANT, value = (0, 0, 0))
         info = [

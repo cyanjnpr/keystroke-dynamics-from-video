@@ -25,9 +25,9 @@ class CharacterExtractor:
     def get_mask_x(self, mask: MatLike):
         return self.get_mask_coords(mask)[0]
     
-    def extract(self) -> Tuple[bool, KUnit]:
+    def extract(self, draw_convex: bool = False) -> Tuple[bool, KUnit]:
         masks = self.extract_all()
-        return self.extract_rc(masks)
+        return self.extract_rc(masks, draw_convex)
 
     def extract_all(self) -> List[MatLike]:
         x, y, w, h = cbb_to_ibb(*cv.boundingRect(self.contour))
@@ -42,7 +42,7 @@ class CharacterExtractor:
             masks.append(mask)
         return sorted(masks, key = lambda mask: self.get_mask_x(mask))
     
-    def extract_rc(self, masks: List[MatLike]) -> Tuple[bool, KUnit]:
+    def extract_rc(self, masks: List[MatLike], draw_convex: bool = False) -> Tuple[bool, KUnit]:
         if len(masks) == 0: return False, None
         mask = masks[-1]
         x, y, w, h = self.get_mask_coords(mask)
@@ -53,7 +53,32 @@ class CharacterExtractor:
         ibb_x, ibb_y, _, _ = cbb_to_ibb(*cv.boundingRect(self.contour))
         x += ibb_x
         y += ibb_y
-        return True, KUnit(self.frame_no, self.sanitize(mask), x, y, w, h)
+        mask = self.sanitize(mask)
+        if (draw_convex):
+            mask = self.separate(mask)
+        else:
+            mask = cv.cvtColor(mask, cv.COLOR_GRAY2BGR)
+        return True, KUnit(self.frame_no, mask, x, y, w, h)
+    
+    def separate(self, mask: MatLike) -> MatLike:
+        contours, _ = cv.findContours(mask, cv.RETR_TREE, cv.CHAIN_APPROX_SIMPLE)
+        mask = cv.cvtColor(mask, cv.COLOR_GRAY2BGR)
+        if len(contours) == 0: return
+        cnt = contours[0]
+        x, y, w, h = cv.boundingRect(cnt)
+        cv.line(mask, (0, y ), (1000, y), (255, 255, 255), 2)
+        cv.line(mask, (0, y + h), (1000, y + h), (255, 255, 255), 2)
+        hull = cv.convexHull(cnt, returnPoints = False)
+        defects = cv.convexityDefects(cnt, hull)
+        if defects is not None:
+            for i in range(defects.shape[0]):
+                s,e,f,_ = defects[i,0]
+                start = tuple(cnt[s][0])
+                end = tuple(cnt[e][0])
+                far = tuple(cnt[f][0])
+                cv.line(mask,start,end,[0,255,0],2)
+                cv.circle(mask,far,2,[0,0,255],3)
+        return mask
         
     def sanitize(self, mask: MatLike) -> MatLike:
         x, y, w, h = self.get_mask_coords(mask)
@@ -62,7 +87,5 @@ class CharacterExtractor:
             (side - h) // 2 + ceil(side / 8.), (side - h) // 2 + ceil(side / 8.),
             (side - w) // 2 + ceil(side / 8.), (side - w) // 2 + ceil(side / 8.),
             cv.BORDER_CONSTANT, value = (0, 0, 0))
-        _, mask = cv.threshold(mask, 127, 255, cv.THRESH_BINARY_INV)
-        mask = cv.cvtColor(mask, cv.COLOR_GRAY2BGR)
         return cv.resize(mask, (128, 128), interpolation=cv.INTER_AREA)
 

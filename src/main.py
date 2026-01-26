@@ -22,12 +22,13 @@ def train(ctx, fallback: bool):
 
 @click.command("analyze")
 @click.argument("filename")
+@click.argument("dest")
 @click.pass_context
-def analyze(ctx, filename: str):
+def analyze(ctx, filename: str, dest: str):
     """
     extract keystroke dynamics from existing video file
     """
-    analyze_command(filename)
+    analyze_command(filename, dest)
 
 @click.command("cbb")
 @click.argument("filename")
@@ -53,12 +54,13 @@ def ibb(ctx, filename: str, dest: str):
 @click.command("kunit")
 @click.argument("filename")
 @click.argument("dest")
+@click.option("-c", "--convexity", is_flag=True, help="Draw convexity of the character")
 @click.pass_context
-def kunit(ctx, filename: str, dest: str):
+def kunit(ctx, filename: str, dest: str, convexity: bool):
     """
     detect rightmost character in each isolation bounding box and save to a directory dest
     """
-    kunit_command(filename, dest)
+    kunit_command(filename, dest, convexity)
 
 
 cli.add_command(train)
