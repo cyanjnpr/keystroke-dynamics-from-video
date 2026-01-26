@@ -24,4 +24,4 @@ poetry run kdfv kunit --convexity <video file> <destination>
 
 ![Convex Defect](.github/convex.gif "Convex Defect")
 
-THIS IS CURRENTLY WIP. Higher haracter separation precision is necessary for it to have a chance to work.
+THIS IS CURRENTLY WIP. Higher character separation precision is necessary for it to have a chance to work.
