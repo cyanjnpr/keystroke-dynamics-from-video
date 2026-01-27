@@ -4,6 +4,7 @@ import tarfile
 import urllib3
 import tempfile
 import click
+from pathlib import Path
 
 # this dataset comes from the following paper:
 #
@@ -43,13 +44,13 @@ def dataset_check(dataset_dir: str, fallback: bool) -> bool:
         return download_dataset(dataset_dir, fallback)
     return True
 
-def train_command(fallback: bool):
-    models_path = "models"
-    dataset_path = "dataset"
-    if dataset_check(dataset_path, fallback):
+def train_command(fallback: bool, dataset_path: str, models_path: str):
+    models_path = Path(models_path)
+    dataset_path = Path(dataset_path)
+    if dataset_check(str(dataset_path), fallback):
         click.echo("Training...")
-        dataset_path = os.path.join(dataset_path, "English", "Fnt")
-        train(dataset_path, models_path)
+        dataset_path = dataset_path / "English" / "Fnt"
+        train(str(dataset_path), str(models_path))
     else:
         click.echo("Failed to download or extract the dataset")
 

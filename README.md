@@ -2,26 +2,34 @@
 
 ![Bounding Box Detection](.github/boxes.gif "Bounding Box Detection")
 
-Algorithm is implemented based on this paper (DOI: 10.1186/s40537-022-00662-8):
-> Spoofing keystroke dynamics authentication
-> through synthetic typing pattern extracted
-> from screen‑recorded video
+This is an implementation of algorithm from the following open access paper:
+> Siahaan, C.R.P., Chowanda, A. Spoofing keystroke dynamics authentication 
+> through synthetic typing pattern extracted from screen-recorded video.
+> J Big Data 9, 111 (2022). https://doi.org/10.1186/s40537-022-00662-8
 
-Since I don't know what dataset was used to train the model from the paper
+Since the dataset used throughout the paper is (I think) not accessible, 
 this repo uses [The Chars74K dataset](https://info-ee.surrey.ac.uk/CVSSP/demos/chars74k/) instead.
 
 ## Usage:
+
+Install [poetry](https://github.com/python-poetry/poetry) and run
 ```
+poetry install
 poetry run kdfv --help
 ```
 
+This project was created for a biometry course, 
+so most of the commands are used for generating figures.
+
 ### Example:
 
-To save images of all separated characters with their convexity (Figure 7 in the paper) use:
+To save images of all separated characters with their convexity (Figure 6 in the paper) use:
 ```
 poetry run kdfv kunit --convexity <video file> <destination>
 ```
 
-![Convex Defect](.github/convex.gif "Convex Defect")
+![Character Convexity](.github/convex.gif "Character Convexity")
 
-THIS IS CURRENTLY WIP. Higher character separation precision is necessary for it to have a chance to work.
+**WIP**. Higher character separation precision is necessary for it to have a chance to work.
+
+

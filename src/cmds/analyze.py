@@ -5,11 +5,12 @@ import os
 import csv
 from rich.progress import Progress
 from typing import List
+import click
 from ..resnet import load_model, predict
 from ..isolation import CursorDetector, CharacterExtractor
 from ..util import KeyStrokePoint, save_location
 
-def analyze_command(filename: str, dest: str):
+def analyze_command(filename: str, dest: str, model_path: str):
     dest_path = save_location(dest, "dynamics")
     src = cv.VideoCapture(filename)
     frame_total = int(src.get(cv.CAP_PROP_FRAME_COUNT))
@@ -18,7 +19,10 @@ def analyze_command(filename: str, dest: str):
     if not s: return
 
     keystrokes: List[KeyStrokePoint] = [KeyStrokePoint()]
-    model = load_model()
+    s, model = load_model(model_path)
+    if not s:
+        click.echo("Failed to find a keras model. Train a model first")
+        return
     fd, filename = tempfile.mkstemp(suffix=".png")
     os.close(fd)
 
@@ -42,6 +46,7 @@ def analyze_command(filename: str, dest: str):
                     keystrokes[-1].add_unit(i, rc, p)
                     keystrokes[-1].calculate_delay(fps)
             s, frame = src.read()
+    os.remove(filename)
     with open(str(dest_path / "biometry.csv"), "w", encoding="utf-8") as file:
         writer = csv.writer(file)
         writer.writerow(["KeyPress", "KeyRelease", "KeyDelay", "KeyText", "Confidence"])

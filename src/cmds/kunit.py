@@ -2,12 +2,13 @@ import cv2 as cv
 from rich.progress import Progress
 import tempfile
 import os
+import click
 
 from ..resnet import load_model, predict
 from ..isolation import CursorDetector, CharacterExtractor
 from ..util import save_location
 
-def kunit_command(filename: str, dest: str, convexity: bool, predictions: bool):
+def kunit_command(filename: str, dest: str, convexity: bool, predictions: bool, model_path: str):
     dest_path = save_location(dest, "kunit")
     src = cv.VideoCapture(filename)
     frame_total = int(src.get(cv.CAP_PROP_FRAME_COUNT))
@@ -15,7 +16,10 @@ def kunit_command(filename: str, dest: str, convexity: bool, predictions: bool):
     if not s: return
 
     if (predictions):
-        model = load_model()
+        s, model = load_model(model_path)
+        if not s:
+            click.echo("Failed to find a keras model. Train a model first")
+            return
         fd, filename = tempfile.mkstemp(suffix=".png")
         os.close(fd)
 
@@ -42,4 +46,4 @@ def kunit_command(filename: str, dest: str, convexity: bool, predictions: bool):
                     else:
                         cv.imwrite(str(dest_path / f"{i}.png"), rc.image_repr())
             s, frame = src.read()
-        
+    if (predictions): os.remove(filename)

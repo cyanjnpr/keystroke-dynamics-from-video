@@ -13,23 +13,26 @@ def cli(ctx):
     pass
 
 @click.command("train")
-@click.option("-f", "--fallback", is_flag=True, help="Use archive link for dataset")
+@click.option("-f", "--fallback", is_flag=True, help="Use the archive link for dataset")
+@click.option("-d", "--dataset", type=str, help="Where to save the dataset", default="dataset")
+@click.option("-m", "--model", type=str, help="Where to save the model", default="models")
 @click.pass_context
-def train(ctx, fallback: bool):
+def train(ctx, fallback: bool, dataset: str, model: str):
     """
     download dataset and train the ResNet model with hyperparameters matching the one from the paper
     """
-    train_command(fallback)
+    train_command(fallback, dataset, model)
 
 @click.command("analyze")
 @click.argument("filename")
 @click.argument("dest")
+@click.option("-m", "--model", type=str, help="path to model file or models directory", default="models")
 @click.pass_context
-def analyze(ctx, filename: str, dest: str):
+def analyze(ctx, filename: str, dest: str, model: str):
     """
     extract keystroke dynamics from existing video file
     """
-    analyze_command(filename, dest)
+    analyze_command(filename, dest, model)
 
 @click.command("cbb")
 @click.argument("filename")
@@ -56,12 +59,13 @@ def ibb(ctx, filename: str, dest: str):
 @click.argument("dest")
 @click.option("-c", "--convexity", is_flag=True, help="Draw convexity of the character")
 @click.option("-p", "--predictions", is_flag=True, help="OCR KUnit images")
+@click.option("-m", "--model", type=str, help="path to model file or models directory", default="models")
 @click.pass_context
-def kunit(ctx, filename: str, dest: str, convexity: bool, predictions: bool):
+def kunit(ctx, filename: str, dest: str, convexity: bool, predictions: bool, model: str):
     """
     detect rightmost character in each isolation bounding box and save to a directory dest
     """
-    kunit_command(filename, dest, convexity, predictions)
+    kunit_command(filename, dest, convexity, predictions, model)
 
 @click.command("capture")
 @click.argument("dest")

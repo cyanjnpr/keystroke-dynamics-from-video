@@ -46,7 +46,10 @@ class CharacterExtractor:
         for i in range(0, num_labels):
             mask: MatLike = (labels == i).astype("uint8") * 255
             masks.append(mask)
+        # sometimes opencv detects background as the one and only component, prevent that
+        masks = filter(lambda mask: np.count_nonzero(mask == 255) < mask.size / 2, masks)
         masks = sorted(masks, key = lambda mask: self.get_mask_x(mask))
+        # characters may consist of mutliple components e.g. 'i'
         return self.merge_by_x(masks)
     
     def merge_by_x(self, masks: List[MatLike]) -> MatLike:
@@ -54,7 +57,7 @@ class CharacterExtractor:
         result = [masks[0]]
         for m in masks[1:]:
             if self.do_masks_overlap(result[-1], m):
-                result[-1] = np.hstack((m, result[-1]))
+                result[-1] = cv.bitwise_or(m, result[-1])
             else:
                 result.append(m)
         return result
