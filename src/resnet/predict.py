@@ -2,6 +2,9 @@ from keras.models import load_model as load
 from keras.preprocessing import image
 import numpy as np
 from dataclasses import dataclass
+import string
+import os
+import click
 
 @dataclass()
 class Prediction:
@@ -10,12 +13,16 @@ class Prediction:
 
 
 def index_to_char(prediction: int):
-    chars = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
+    chars = string.digits + string.ascii_uppercase + string.ascii_lowercase
     return chars[prediction]
 
-def load_model(path: str):
-    model = load(path)
-    return model
+def load_model(source: str = "models"):
+    model_list = [model for model in os.listdir("models") if model.endswith(".keras")]
+    model_list.sort()
+    if len(model_list) == 0:
+        click.echo("No models detected. Train a model first.")
+        return
+    return load(os.path.join("models", model_list[-1]))
 
 def predict(path, model) -> Prediction:
     img = image.load_img(path, 

@@ -3,7 +3,8 @@ ConfigManager.set_config_path("default.conf")
 
 import click
 from .cmds import (train_command, analyze_command, 
-    cbb_command, ibb_command, kunit_command)
+    cbb_command, ibb_command, kunit_command,
+    capture_command)
 
 @click.group()
 @click.version_option("0.0.1")
@@ -50,20 +51,30 @@ def ibb(ctx, filename: str, dest: str):
     """
     ibb_command(filename, dest)
 
-
 @click.command("kunit")
 @click.argument("filename")
 @click.argument("dest")
 @click.option("-c", "--convexity", is_flag=True, help="Draw convexity of the character")
+@click.option("-p", "--predictions", is_flag=True, help="OCR KUnit images")
 @click.pass_context
-def kunit(ctx, filename: str, dest: str, convexity: bool):
+def kunit(ctx, filename: str, dest: str, convexity: bool, predictions: bool):
     """
     detect rightmost character in each isolation bounding box and save to a directory dest
     """
-    kunit_command(filename, dest, convexity)
+    kunit_command(filename, dest, convexity, predictions)
+
+@click.command("capture")
+@click.argument("dest")
+@click.pass_context
+def capture(ctx, dest: str):
+    """
+    keylogger for capturing real keystroke dynamics
+    """
+    capture_command(dest)
 
 cli.add_command(train)
 cli.add_command(analyze)
 cli.add_command(cbb)
 cli.add_command(ibb)
 cli.add_command(kunit)
+cli.add_command(capture)

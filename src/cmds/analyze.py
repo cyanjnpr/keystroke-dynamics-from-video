@@ -9,14 +9,6 @@ from ..resnet import load_model, predict
 from ..isolation import CursorDetector, CharacterExtractor
 from ..util import KeyStrokePoint, save_location
 
-def get_model():
-    model_list = [model for model in os.listdir("models") if model.endswith(".keras")]
-    model_list.sort()
-    if len(model_list) == 0:
-        print("No models detected. Train a model first.")
-        return
-    return load_model(os.path.join("models", model_list[-1]))
-
 def analyze_command(filename: str, dest: str):
     dest_path = save_location(dest, "dynamics")
     src = cv.VideoCapture(filename)
@@ -26,7 +18,7 @@ def analyze_command(filename: str, dest: str):
     if not s: return
 
     keystrokes: List[KeyStrokePoint] = [KeyStrokePoint()]
-    model = get_model()
+    model = load_model()
     fd, filename = tempfile.mkstemp(suffix=".png")
     os.close(fd)
 
