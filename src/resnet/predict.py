@@ -28,7 +28,7 @@ def load_model(source: str) -> Tuple[bool, any]:
         model_list.sort()
         path /= model_list[-1]
     elif not str(path).endswith(".keras"): return False, None
-    return load(str(path))
+    return True, load(str(path))
 
 def predict(path, model) -> Prediction:
     img = image.load_img(path, 

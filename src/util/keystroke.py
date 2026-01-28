@@ -32,4 +32,5 @@ class KeyStrokePoint():
         self.units.append(unit)
 
     def calculate_delay(self, fps: float):
-        self.key_delay = (self.key_release - self.key_press) * 1000 / fps
+        ikt =  (self.key_release - self.key_press + 1)
+        self.key_delay = (1000 / fps) * ikt

@@ -28,7 +28,12 @@ To save images of all separated characters with their convexity (Figure 6 in the
 poetry run kdfv kunit --convexity <video file> <destination>
 ```
 
-![Character Convexity](.github/convex.gif "Character Convexity")
+To save images with their predicted character annotated use:
+```
+poetry run kdfv kunit --predictions <video file> <destination>
+```
+
+![Character Convexity](.github/convex.gif "Character Convexity") ![Character Prediction](.github/predict.gif "Character Prediction")
 
 **WIP**. Higher character separation precision is necessary for it to have a chance to work.
 

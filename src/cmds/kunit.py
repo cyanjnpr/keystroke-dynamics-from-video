@@ -41,7 +41,8 @@ def kunit_command(filename: str, dest: str, convexity: bool, predictions: bool, 
                         p = predict(filename, model)
                         cv.imwrite(str(dest_path / f"{i}.png"), rc.image_repr_info(
                             f"Predicted Character: {p.character}",
-                            f"Confidence: {p.accuracy*100:.2f}%"
+                            f"Confidence: {p.accuracy*100:.2f}%",
+                            "" if p.accuracy > .7 else "low_confidence"
                         ))
                     else:
                         cv.imwrite(str(dest_path / f"{i}.png"), rc.image_repr())

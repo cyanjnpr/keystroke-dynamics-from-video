@@ -6,7 +6,7 @@ import cv2 as cv
 from math import ceil
 import numpy as np
 
-CURSOR_WIDTH_CUTOFF = 3
+# CURSOR_WIDTH_CUTOFF = 3
 
 class CharacterExtractor:
     frame_no: int
@@ -48,6 +48,8 @@ class CharacterExtractor:
             masks.append(mask)
         # sometimes opencv detects background as the one and only component, prevent that
         masks = filter(lambda mask: np.count_nonzero(mask == 255) < mask.size / 2, masks)
+        # remove video artifacts
+        masks = filter(lambda mask: max(self.get_mask_coords(mask)[2:]) > 3, masks)
         masks = sorted(masks, key = lambda mask: self.get_mask_x(mask))
         # characters may consist of mutliple components e.g. 'i'
         return self.merge_by_x(masks)
@@ -67,7 +69,7 @@ class CharacterExtractor:
         mask = masks[-1]
         x, y, w, h = self.get_mask_coords(mask)
         # mask is a cursor, skip
-        if (w < CURSOR_WIDTH_CUTOFF and len(masks) > 1):
+        if (self.is_mask_cursor(mask) and len(masks) > 1):
             mask = masks[-2]
             x, y, w, h = self.get_mask_coords(mask)
         ibb_x, ibb_y, _, _ = cbb_to_ibb(*cv.boundingRect(self.contour))
@@ -79,6 +81,16 @@ class CharacterExtractor:
         else:
             mask = cv.cvtColor(mask, cv.COLOR_GRAY2BGR)
         return True, KUnit(self.frame_no, mask, x, y, w, h)
+    
+    def is_mask_cursor(self, mask: MatLike) -> bool:
+        contours, _ = cv.findContours(mask, cv.RETR_TREE, cv.CHAIN_APPROX_SIMPLE)
+        mask = cv.cvtColor(mask, cv.COLOR_GRAY2BGR)
+        if len(contours) == 0: return False
+        cnt = contours[0]
+        _, _, w, h = cv.boundingRect(cnt)
+        hull = cv.convexHull(cnt, returnPoints = False)
+        defects = cv.convexityDefects(cnt, hull)
+        return defects is None and w <= h 
     
     def draw_convexity(self, mask: MatLike) -> MatLike:
         contours, _ = cv.findContours(mask, cv.RETR_TREE, cv.CHAIN_APPROX_SIMPLE)

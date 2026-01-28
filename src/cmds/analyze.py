@@ -49,7 +49,6 @@ def analyze_command(filename: str, dest: str, model_path: str):
     os.remove(filename)
     with open(str(dest_path / "biometry.csv"), "w", encoding="utf-8") as file:
         writer = csv.writer(file)
-        writer.writerow(["KeyPress", "KeyRelease", "KeyDelay", "KeyText", "Confidence"])
+        writer.writerow(["KeyPress", "KeyRelease", "KeyDelay", "KeyText", "Confidence", "IsLowConfidence"])
         for k in keystrokes:
-            if k.confidence > .7:
-                writer.writerow([k.key_press, k.key_release, k.key_delay, k.key_text, k.confidence])
+            writer.writerow([k.key_press, k.key_release, k.key_delay, k.key_text, k.confidence, int(k.confidence < .7)])
